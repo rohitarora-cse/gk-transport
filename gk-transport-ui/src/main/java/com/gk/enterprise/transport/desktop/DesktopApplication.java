@@ -5,6 +5,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -13,13 +15,16 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import my.cool.lib.ExcelUtil;
+import com.gk.enterprise.transport.manager.ServiceManager;
 
 /**
  * @author rohit
  *
  */
 public class DesktopApplication {
+	
+	private ServiceManager serviceManager = new ServiceManager();
+
 	private JFrame mainFrame;
 	private JLabel headerLabel;
 	private JLabel selectedFileLabel;
@@ -96,9 +101,17 @@ public class DesktopApplication {
 			if (command.equals("Open File")) {
 				chooseExcelFile();
 			} else if (command.equals("Process File")) {
-				statusLabel.setText("Processing the selected file.");
-				ExcelUtil.sendEmailsFromExcelFile(selectedFile);
-				statusLabel.setText("Email sent successfully.");
+				try {
+					statusLabel.setText("Processing the selected file.");
+					serviceManager.sendEmailsAndSmsFromExcelFile(selectedFile);
+					statusLabel.setText("Email sent successfully.");
+				} catch (FileNotFoundException e1) {
+					statusLabel.setText("File Not Found.");
+					e1.printStackTrace();
+				} catch (IOException e1) {
+					statusLabel.setText("Invalid Data in Excel File.");
+					e1.printStackTrace();
+				}
 			} else {
 				statusLabel.setText("Unknow Operation Selected.");
 			}
