@@ -1,0 +1,9 @@
+<html>
+    <body>
+        <h3>Hi ${client.documentId}, welcome to the Chipping Sodbury On-the-Hill message boards!</h3>
+
+        <div>
+            Your email address is <a href="mailto:rohitarora.cse@gmail.com">${client.documentId}</a>.
+        </div>
+    </body>
+</html>
