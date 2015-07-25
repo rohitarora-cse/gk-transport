@@ -3,7 +3,9 @@ import java.lang.ClassValue.Version;
 dependencies {
 	compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
 	compile group: 'org.apache.poi', name: 'poi', version: '3.9'
+	compile 'org.apache.poi:poi-ooxml:3.9'
 	compile group: 'org.apache.velocity', name: 'velocity', version: '1.6.2'
 	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
 	compile group: 'com.sun.mail', name: 'javax.mail', version: '1.5.4'
+	compile 'org.springframework:spring-context-support:4.1.6.RELEASE'
 }

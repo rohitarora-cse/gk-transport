@@ -6,20 +6,29 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.poi.hssf.usermodel.HSSFSheet;
+import javax.mail.MessagingException;
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.velocity.exception.VelocityException;
 
 import com.gk.enterprise.transport.bean.ExcelDocumentRow;
 import com.gk.enterprise.transport.listener.ExcelDocumentRowListener;
 
 public class ExcelServiceImpl {
 
-	public void processFile(File file, ExcelDocumentRowListener processor) throws FileNotFoundException, IOException{
-		
-		HSSFWorkbook workbook = new HSSFWorkbook(new FileInputStream(file));
-		HSSFSheet sheet = workbook.getSheetAt(0);
+	public void processFile(File file, ExcelDocumentRowListener processor) throws FileNotFoundException, IOException, VelocityException, MessagingException{
+		Workbook workbook = null;
+		if(file.getName().endsWith("xls")) {
+			workbook = new HSSFWorkbook(new FileInputStream(file));
+		} else if(file.getName().endsWith("xlsx")) {
+			workbook = new XSSFWorkbook(new FileInputStream(file));
+		}
+		Sheet sheet = workbook.getSheetAt(0);
 		ExcelDocumentRow documentRow;
 		
 		Iterator<Row> rowIterator = sheet.rowIterator();

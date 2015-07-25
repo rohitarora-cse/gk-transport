@@ -2,43 +2,50 @@ package com.gk.enterprise.transport.service;
 
 import java.util.Properties;
 
-import org.springframework.mail.SimpleMailMessage;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.mail.javamail.MimeMessageHelper;
 
 import com.gk.enterprise.transport.bean.EmailBean;
 
 public class EmailServiceImpl {
 
-	public void sendEmail(EmailBean emailBean) {
+	private static final String username = "support@laneaxis.com";
+	private static final String password = "L@n3@x!s@1234";
 
-		JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-		
-		Properties javaMailProperties = new Properties();
-		
-		javaMailProperties.put("mail.smtp.host", "smtp.gmail.com");
-		javaMailProperties.put("mail.smtp.socketFactory.port", "465");
-		javaMailProperties.put("mail.smtp.socketFactory.class",
-				"javax.net.ssl.SSLSocketFactory");
-		javaMailProperties.put("mail.smtp.auth", "true");
-		javaMailProperties.put("mail.smtp.port", "465");
-		/*
-		javaMailProperties.put("mail.smtp.auth", "true");
-		javaMailProperties.put("mail.smtp.starttls.enable", "true");
-		javaMailProperties.put("mail.smtp.host", "smtp.gmail.com");
-		javaMailProperties.put("mail.smtp.port", "587");*/
-		
-		mailSender.setJavaMailProperties(javaMailProperties);
-		mailSender.setUsername("rohitarora.cse@gmail.com");
-		mailSender.setPassword("itsdifferent");
+	public void sendEmail(EmailBean emailBean) throws MessagingException {
 
-		SimpleMailMessage message = new SimpleMailMessage();
-		 
-		message.setFrom("rohitarora.cse@gmail.com");
+		String host = "smtp.gmail.com";
+		String port = "25";
+		JavaMailSenderImpl javaMailSender = new JavaMailSenderImpl();
+		javaMailSender.setHost(host);
+		javaMailSender.setPort(Integer.parseInt(port));
+		javaMailSender.setUsername(username);
+		javaMailSender.setPassword(password);
+		javaMailSender.setJavaMailProperties(getMailProperties());
+
+		MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+		MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
+
+		message.setFrom(username);
 		message.setTo(emailBean.getEmailIds());
 		message.setSubject("Document No");
-		message.setText(emailBean.getEmailContent());
-		mailSender.send(message);	
-		
-		System.out.println("success");
+		message.setText(emailBean.getEmailContent(), true);
+
+		javaMailSender.send(mimeMessage);
 	}
+
+	private Properties getMailProperties() {
+		String smtpAuth = "true";
+		String starttls = "true";
+		String timeout = "200000";
+		Properties properties = new Properties();
+		properties.setProperty("mail.smtp.auth", smtpAuth);
+		properties.setProperty("mail.smtp.starttls.enable", starttls);
+		properties.put("mail.smtp.timeout", timeout);
+		return properties;
+	}
+
 }

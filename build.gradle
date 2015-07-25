@@ -1,6 +1,7 @@
 subprojects {
 	apply plugin: 'java'
 	apply plugin: 'eclipse'
+	apply plugin: 'war'
 
 	repositories {
 		mavenCentral()
@@ -15,7 +16,7 @@ subprojects {
 	jar {
 		manifest {
 			attributes('Main-Class': 'com.gk.enterprise.transport.desktop.DesktopApplication',
-				'provider': 'GK Softwares')
+			'provider': 'GK Softwares')
 		}
 	}
 }

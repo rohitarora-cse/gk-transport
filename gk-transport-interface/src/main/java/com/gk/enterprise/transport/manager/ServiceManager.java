@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.mail.MessagingException;
+
 import org.apache.velocity.exception.VelocityException;
 
 import com.gk.enterprise.transport.bean.Client;
@@ -25,12 +27,12 @@ public class ServiceManager implements ExcelDocumentRowListener{
 	private VelocityServiceImpl velocityService = new VelocityServiceImpl();
 	private EmailServiceImpl emailService = new EmailServiceImpl();
 	
-	public void sendEmailsAndSmsFromExcelFile(File excelFile) throws FileNotFoundException, IOException {
+	public void sendEmailsAndSmsFromExcelFile(File excelFile) throws FileNotFoundException, IOException, VelocityException, MessagingException {
 		excelService.processFile(excelFile, this);
 	}
 
 	@Override
-	public void processRow(ExcelDocumentRow row) throws VelocityException, IOException {
+	public void processRow(ExcelDocumentRow row) throws VelocityException, IOException, MessagingException {
 		System.out.println(row);
 		/*DocumentBean bean = new DocumentBean();
 		bean.setDocumentId(row.getDocumentId());

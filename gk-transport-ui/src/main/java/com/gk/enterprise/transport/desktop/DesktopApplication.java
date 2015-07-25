@@ -8,12 +8,15 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+import javax.mail.MessagingException;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import org.apache.velocity.exception.VelocityException;
 
 import com.gk.enterprise.transport.manager.ServiceManager;
 
@@ -30,7 +33,8 @@ public class DesktopApplication {
 	private JLabel selectedFileLabel;
 	private JLabel statusLabel;
 	private JPanel controlPanel;
-
+	private JButton processButton;
+	
 	private File selectedFile;
 	
 	public static void main(String[] args) {
@@ -55,7 +59,7 @@ public class DesktopApplication {
 		selectedFileLabel = new JLabel("No File Selected", JLabel.CENTER);
 		
 		controlPanel = new JPanel();
-		controlPanel.setLayout(new FlowLayout());
+		controlPanel.setLayout(new GridLayout(2, 1));
 
 		mainFrame.add(headerLabel);
 		mainFrame.add(controlPanel);
@@ -68,13 +72,23 @@ public class DesktopApplication {
 		okButton.setActionCommand("Open File");
 		okButton.addActionListener(new ButtonClickListener());
 
-		JButton processButton = new JButton("Process File");
+		processButton = new JButton("Process File");
 		processButton.setActionCommand("Process File");
 		processButton.addActionListener(new ButtonClickListener());
+		processButton.setEnabled(false);
 
-		controlPanel.add(okButton);
-		controlPanel.add(selectedFileLabel);
-		controlPanel.add(processButton);
+		JPanel fileSelector = new JPanel();
+		fileSelector.setLayout(new FlowLayout());
+
+		JPanel processContainer = new JPanel();
+		processContainer.setLayout(new FlowLayout());
+
+		fileSelector.add(okButton);
+		fileSelector.add(selectedFileLabel);
+		processContainer.add(processButton);
+		
+		controlPanel.add(fileSelector);
+		controlPanel.add(processContainer);
 
 		mainFrame.setVisible(true);
 	}
@@ -88,9 +102,12 @@ public class DesktopApplication {
 		int returnVal = fileDialog.showOpenDialog(mainFrame);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			selectedFile = fileDialog.getSelectedFile();
+			processButton.setEnabled(true);
 			selectedFileLabel.setText(selectedFile.getAbsolutePath());
 			statusLabel.setText("File Selected :" + selectedFile.getName());
 		} else {
+			processButton.setEnabled(false);
+			selectedFileLabel.setText("No File Selected");
 			statusLabel.setText("Operation cancelled by user.");
 		}
 	}
@@ -101,17 +118,33 @@ public class DesktopApplication {
 			if (command.equals("Open File")) {
 				chooseExcelFile();
 			} else if (command.equals("Process File")) {
-				try {
-					statusLabel.setText("Processing the selected file.");
-					serviceManager.sendEmailsAndSmsFromExcelFile(selectedFile);
-					statusLabel.setText("Email sent successfully.");
-				} catch (FileNotFoundException e1) {
-					statusLabel.setText("File Not Found.");
-					e1.printStackTrace();
-				} catch (IOException e1) {
-					statusLabel.setText("Invalid Data in Excel File.");
-					e1.printStackTrace();
-				}
+				processButton.setEnabled(false);
+				statusLabel.setText("Processing the selected file.");
+				Runnable processExcelFile = new Runnable() {
+					@Override
+					public void run() {
+						try {
+							serviceManager.sendEmailsAndSmsFromExcelFile(selectedFile);
+							statusLabel.setText("Email sent successfully.");
+						} catch (FileNotFoundException e1) {
+							statusLabel.setText("File Not Found.");
+							e1.printStackTrace();
+						} catch (IOException e1) {
+							statusLabel.setText("Invalid Data in Excel File.");
+							e1.printStackTrace();
+						} catch (VelocityException e1) {
+							statusLabel.setText("Velocity Engine Failed.");
+							e1.printStackTrace();
+						} catch (MessagingException e1) {
+							statusLabel.setText("Unable to sent mail, Probabaly Network issue.");
+							e1.printStackTrace();
+						} finally {
+							processButton.setEnabled(true);
+						}						
+					}
+				};
+				Thread processExcelFileThread = new Thread(processExcelFile);
+				processExcelFileThread.start();
 			} else {
 				statusLabel.setText("Unknow Operation Selected.");
 			}
