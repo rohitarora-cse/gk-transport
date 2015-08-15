@@ -32,6 +32,6 @@ public class VelocityServiceImpl {
 		model.put("client", client);
 
 		return VelocityEngineUtils.mergeTemplateIntoString(velocityEngine,
-				"com/gk/enterprise/transport/emailTemplate.vm", model);
+				"templates/emailTemplate.vm", model);
 	}
 }

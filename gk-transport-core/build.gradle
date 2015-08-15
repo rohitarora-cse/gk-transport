@@ -1,6 +1,16 @@
 import java.lang.ClassValue.Version;
 
+configurations {
+	liquibase
+
+	all*.exclude group: 'commons-logging', module: 'commons-logging'
+}
+
 dependencies {
+
+	liquibase ('org.liquibase:liquibase-core:3.2.2'
+			,'org.postgresql:postgresql:9.2-1003-jdbc4')
+
 	compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
 	compile group: 'org.apache.poi', name: 'poi', version: '3.9'
 	compile 'org.apache.poi:poi-ooxml:3.9'
@@ -8,4 +18,30 @@ dependencies {
 	compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.12'
 	compile group: 'com.sun.mail', name: 'javax.mail', version: '1.5.4'
 	compile 'org.springframework:spring-context-support:4.1.6.RELEASE'
+	compile 'org.liquibase:liquibase-core:3.2.2'
+	compile 'org.postgresql:postgresql:9.2-1003-jdbc4'
+	compile 'org.springframework.boot:spring-boot-starter-web:1.2.5.RELEASE'
+}
+
+task updateDatabase(dependsOn: classes) << {
+	ant.taskdef (
+			resource: 'liquibasetasks.properties'
+			,classpath: configurations.liquibase.asPath
+			)
+
+	ant.path(id: 'classpath') {
+		ant.pathelement(path: configurations.liquibase.asPath)
+		ant.pathelement(path: sourceSets.main.runtimeClasspath.asPath)
+	}
+
+	ant.updateDatabase (
+			changeLogFile: 'src/etc/liquibase/masterdb_changelog.xml'
+			,url: 'jdbc:postgresql://localhost:5432/database'
+			,username: 'postgres'
+			,password: 'Post@123'
+			,driver: 'org.postgresql.Driver'
+			,dropFirst: false
+			,classpathref: 'classpath'
+			,contexts: 'devl'
+			)
 }
